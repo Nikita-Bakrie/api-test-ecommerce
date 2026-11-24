@@ -1,0 +1,240 @@
+{
+  "info": {
+    "_postman_id": "0cba8cbc-ef31-4488-81a1-a864217608cc",
+    "name": "API-Test-ECommerce",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "60389032",
+    "_collection_link": "https://go.postman.co/collection/60389032-0cba8cbc-ef31-4488-81a1-a864217608cc?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200 & token terbit\", function () {\r\n    pm.response.to.have.status(200);\r\n    var res = pm.response.json();\r\n    pm.expect(res.access_token).to.be.a(\"string\").and.not.empty;\r\n    pm.environment.set(\"jwt_token\", res.access_token);\r\n});\r\npm.test(\"Response time < 5000ms\", () => pm.expect(pm.response.responseTime).to.be.below(5000));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"email\": \"{{username}}\", \"password\": \"{{password}}\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/users/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "users",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Buat Cart",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201 & cart_id terbit\", function () {\r\n    pm.response.to.have.status(201);\r\n    var res = pm.response.json();\r\n    pm.expect(res.id).to.be.a(\"string\").and.not.empty;\r\n    pm.environment.set(\"cart_id\", res.id);\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/carts",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "carts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Item",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.sendRequest(pm.environment.get(\"base_url\") + \"/products\", function (err, res) {\r\n    if (!err) pm.environment.set(\"product_id\", res.json().data[0].id);\r\n});"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Item masuk cart\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"product_id\": \"{{product_id}}\", \"quantity\": 1 }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/carts/{{cart_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "carts",
+            "{{cart_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Payment Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Payment valid\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"payment_method\": \"credit-card\",\r\n  \"payment_details\": {\r\n    \"credit_card_number\": \"1111-1111-1111-1111\",\r\n    \"expiration_date\": \"12/2030\",\r\n    \"cvv\": \"123\",\r\n    \"card_holder_name\": \"Test User\"\r\n  }\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/payment/check",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "payment",
+            "check"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Checkout",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Order berhasil dibuat\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r\n    pm.expect(pm.response.json()).to.have.property(\"invoice_number\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"cart_id\": \"{{cart_id}}\",\r\n  \"billing_street\": \"Jl. Test 1\",\r\n  \"billing_city\": \"Jakarta\",\r\n  \"billing_state\": \"DKI Jakarta\",\r\n  \"billing_country\": \"ID\",\r\n  \"billing_postcode\": \"12950\",\r\n  \"payment_method\": \"credit-card\",\r\n  \"payment_details\": {\r\n    \"credit_card_number\": \"1111-1111-1111-1111\",\r\n    \"expiration_date\": \"12/2030\",\r\n    \"cvv\": \"123\",\r\n    \"card_holder_name\": \"Test User\"\r\n  }\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/invoices",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "invoices"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

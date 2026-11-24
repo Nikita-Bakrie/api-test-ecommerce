@@ -1,0 +1,13 @@
+{
+  "id": "staging-env",
+  "name": "Stagging",
+  "values": [
+    { "key": "base_url", "value": "https://api.practicesoftwaretesting.com", "enabled": true },
+    { "key": "username", "value": "customer@practicesoftwaretesting.com", "enabled": true },
+    { "key": "password", "value": "welcome01", "enabled": true },
+    { "key": "jwt_token", "value": "", "enabled": true },
+    { "key": "cart_id", "value": "", "enabled": true },
+    { "key": "product_id", "value": "", "enabled": true }
+  ],
+  "_postman_variable_scope": "environment"
+}
